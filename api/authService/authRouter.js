@@ -4,6 +4,7 @@ const bcrypt = require("bcryptjs");
 const User = require("../../models").user;
 const { Op } = require("sequelize");
 
+const { getRefreshCookieKey } = require("./config")
 const authenticate = require("./authenticate");
 const setResponseCredentials = require("./setResponseCredentials.js");
 const { loginValidation, registerValidation } = require("./validation");
@@ -36,7 +37,8 @@ authRouter.post("/register", async (req, res) => {
     if (!newUser)
       throw new Error(`An error occured while adding the user to the database`);
 
-    res.status(201).send({ email: newUser.email, password: password });
+    delete newUser.dataValues.password;
+    res.status(201).send(newUser);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -49,6 +51,7 @@ authRouter.post("/login", async (req, res) => {
     return res.status(400).json({ error: `${error.details[0].message}` });
 
   const { email, password } = req.body;
+
   try {
     const user = await User.findOne({
       where: { email: { [Op.eq]: email } },
@@ -61,19 +64,27 @@ authRouter.post("/login", async (req, res) => {
 
     setResponseCredentials(user, res);
 
-    res.sendStatus(200);
+    delete user.dataValues.password;
+    res.status(200).send(user);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 });
 
 authRouter.post("/logout", (req, res) => {
-  res.clearCookie("refresh-token");
+  res.clearCookie(getRefreshCookieKey());
   res.sendStatus(204);
 });
 
 authRouter.get("/tokens", authenticate, async (req, res) => {
-  res.sendStatus(200);
+  try {
+    const userData = await User.findByPk(req.user.id, {
+      attributes: { exclude: ["password"] },
+    });
+    res.status(200).send(userData);
+  } catch (err) {
+    throw new Error("Invalid user");
+  }
 });
 
 module.exports = authRouter;

@@ -1,13 +1,12 @@
 const User = require("../../models").user;
 const { Op } = require("sequelize");
 
+const { getRefreshCookieKey } = require("./config")
 const tokenService = require("./tokenService");
 const setResponseCredentials = require("./setResponseCredentials.js");
 
 const getUserById = async (id) => {
-  return (user = await User.findOne({
-    where: { id: { [Op.eq]: id } },
-  }));
+  return (user = await User.findByPk(id));
 };
 
 function getAccessTokenFromRequest(req) {
@@ -29,7 +28,7 @@ module.exports = async function authenticate(req, res, next) {
     }
   }
 
-  const refreshToken = req.cookies["refresh-token"];
+  const refreshToken = req.cookies[getRefreshCookieKey()];
   if (!refreshToken) {
     const error = new Error("You must be signed in for access.");
     error.statusCode = 403;
