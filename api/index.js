@@ -2,6 +2,8 @@ const express = require("express");
 const api = express();
 
 const aspectRouter = require("./routes/aspect");
+const assetRouter = require("./routes/asset");
+const assetTypeRouter = require("./routes/assetType");
 const flowRouter = require("./routes/flow");
 const authService = require("./authService");
 const taskRouter = require("./routes/tasks");
@@ -18,6 +20,8 @@ api.use("/auth", authService.authRouter);
 api.use(authService.authenticate);
 
 api.use("/aspect", aspectRouter);
+api.use("/assets", assetRouter);
+api.use("/assetTypes", assetTypeRouter);
 api.use("/flow", flowRouter);
 api.use("/tasks", taskRouter);
 api.use("/users", userRouter);
