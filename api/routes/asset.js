@@ -85,7 +85,7 @@ assetRouter.get("/", async function (req, res, next) {
     where: {
       userId: { [Op.eq]: req.user.id },
     },
-    attributes: { include: ["id", "label", "description", "typeId"] },
+    attributes: ["id", "label", "description", "typeId"],
     order: [["label", "ASC"]],
   };
 
@@ -123,6 +123,73 @@ assetRouter.get("/count", async function (req, res, next) {
   }
 });
 
+assetRouter.get("/roots", async function (req, res) {
+  const filter = {
+    where: {
+      userId: { [Op.eq]: req.user.id },
+    },
+    attributes: ["id", "label", "description"],
+    order: [["label", "ASC"]],
+  };
+
+  const assetTypeFilter = {
+    where: {
+      label: { [Op.eq]: "property" },
+    },
+    attributes: ["id"],
+  };
+
+  try {
+    const typeIdOfProperty = await db.assetType.findOne(assetTypeFilter);
+
+    filter.where.typeId = typeIdOfProperty.dataValues.id;
+
+    const properties = await db.asset.findAll(filter);
+    // console.log("properties: ", properties);
+
+    async function getPropertiesDirectDescendants() {
+      return await Promise.all(
+        properties.map(async (property) => {
+          const propertyWithLinks = {
+            ...property.dataValues,
+            links: {
+              href: `/assets/${property.id}`,
+            },
+          };
+          const directDescendants = await getDirectDescendants(property.id);
+          const directDescendantsWithLinks = directDescendants.map(
+            (descendant) => {
+              return {
+                ...descendant.dataValues,
+                links: {
+                  href: `/assets/${descendant.id}`,
+                },
+              };
+            }
+          );
+          return {
+            ...propertyWithLinks,
+            directDescendants: directDescendantsWithLinks,
+          };
+        })
+      );
+    }
+
+    const propertiesWithDescendants = await getPropertiesDirectDescendants();
+    res.status(200).send(propertiesWithDescendants);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({ error: err.message });
+  }
+});
+
+function getDirectDescendants(assetId) {
+  return db.asset.findAll({
+    where: { locationId: { [Op.eq]: assetId } },
+    attributes: ["id", "label", "description"],
+  });
+}
+
 assetRouter.post("/", async (req, res, next) => {
   console.log("req.body: ", req.body);
   const assetWithUser = { userId: req.user.id, ...req.body };
@@ -154,7 +221,7 @@ assetRouter.get("/asset/:assetId", async (req, res, next) => {
     if (!children) {
       throw new Error("could not find asset children");
     }
-    asset.setDataValue("children", children);
+    asset.setDataValue("descendants", children);
 
     res.status(200).send(asset);
   } catch (err) {
@@ -162,14 +229,38 @@ assetRouter.get("/asset/:assetId", async (req, res, next) => {
   }
 });
 
+async function isLocationValid(userId, assetId, locationId) {
+  if (locationId === assetId) return false;
+
+  const locationAncestors = await getAssetAncestors(userId, locationId);
+
+  const matchedAncestor = locationAncestors.filter(
+    (ancestor) => ancestor?.id === assetId
+  );
+
+  if (matchedAncestor.length > 0) {
+    return false;
+  } else {
+    return true;
+  }
+}
+
 assetRouter.patch("/asset/:assetId", async (req, res, next) => {
   const userId = req.user.id;
   const assetId = req.params.assetId;
+  const newLocationId = req.body.locationId;
 
   try {
     const asset = await getAssetById(userId, assetId);
 
     if (!asset) throw new Error("asset not found");
+
+    // TODO check that a new location is not a descendant or a descendant  of a descendant
+    if (newLocationId) {
+      const isValid = await isLocationValid(userId, assetId, newLocationId);
+
+      if (!isValid) throw new Error("location is not valid");
+    }
 
     const updatedAsset = await asset.update(req.body);
 
@@ -179,6 +270,7 @@ assetRouter.patch("/asset/:assetId", async (req, res, next) => {
     if (!ancestors) {
       throw new Error("could not find asset tree");
     }
+
     updatedAsset.setDataValue("ancestors", ancestors);
 
     const children = await getAssetChildren(userId, assetId);
@@ -189,6 +281,7 @@ assetRouter.patch("/asset/:assetId", async (req, res, next) => {
 
     res.status(200).send(updatedAsset);
   } catch (err) {
+    console.log("err.message: ", err.message);
     res.status(409).send({ error: err.message });
   }
 });
