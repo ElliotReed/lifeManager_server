@@ -12,6 +12,7 @@ const {
 /* GET users listing. */
 userRouter.get("/", async function (req, res, next) {
   const users = await db.user.findAll();
+  users.map(user => delete user.dataValues.password);
   res.send(users);
 });
 

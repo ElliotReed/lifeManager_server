@@ -1,14 +1,14 @@
 require("dotenv/config");
-var cookieParser = require("cookie-parser");
+const cookieParser = require("cookie-parser");
 const cors = require("cors");
-var createError = require("http-errors");
-var express = require("express");
-var logger = require("morgan");
-var path = require("path");
+const createError = require("http-errors");
+const express = require("express");
+const logger = require("morgan");
+const path = require("path");
 
 const api = require("./api");
 
-var app = express();
+const app = express();
 
 const corsOptions = {
   origin:
@@ -40,7 +40,7 @@ app.use(function (err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
-  // res.render("error");
+  res.render("error");
 });
 
 module.exports = app;

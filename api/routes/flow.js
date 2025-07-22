@@ -4,6 +4,9 @@ const db = require("../../models");
 const { Op } = require("sequelize");
 const { Sequelize } = require("../../models");
 
+// Since flow is ordered by dtCompleted, updating the flow requires resetting the dtCompleted to null NOT IMPLEMENTED (other solutions?)
+// if setting date to null, get order for dtCompleted should be "ASC NULLS FIRST"
+
 flowRouter.get("/", async function (req, res, next) {
   const filter = {
     where: {
@@ -11,7 +14,7 @@ flowRouter.get("/", async function (req, res, next) {
     },
     include: [{ model: db.aspect, required: true, attributes: ["name"] }],
     order: [
-      ["dtCompleted", "ASC"],
+      ["dtCompleted", "ASC NULLS FIRST"],
       ["flow", "ASC"],
     ],
   };
@@ -23,6 +26,7 @@ flowRouter.get("/", async function (req, res, next) {
     res.status(409).send({ error: err.message });
   }
 });
+
 
 flowRouter.post("/", async (req, res, next) => {
   const id = req.user.id;

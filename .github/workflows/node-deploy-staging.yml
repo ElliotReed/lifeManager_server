@@ -1,0 +1,128 @@
+name: Deploy to Hosting (Staging)
+
+on:
+  push:
+    branches:
+      - dev
+  workflow_dispatch:
+
+env:
+  # Server connection details
+  SSH_HOST: elliotreed.net
+  SSH_PORT: 7822
+  SSH_USER: elliotre
+
+  # Project-specific variables (customize these for each project)
+  PROJECT_NAME: api.lifemanager.staging.elliotreed.net
+  NODE_VERSION: "20"
+  BUILD_COMMAND: "npm run build"
+  BUILD_OUTPUT_DIR: "./dist/"
+
+  # Deployment paths
+  REMOTE_BASE_PATH: "/home/elliotre"
+  NODE_ENV_PATH: "/home/elliotre/nodevenv"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Setup SSH key for deployment
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+
+      - name: Add SSH host to known_hosts
+        run: |
+          ssh-keyscan -p ${{ env.SSH_PORT }} ${{ env.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests (if available)
+        run: |
+          if npm run | grep -q "test"; then
+            npm test
+          else
+            echo "No test script found, skipping tests"
+          fi
+        continue-on-error: true
+
+      - name: Build project
+        run: ${{ env.BUILD_COMMAND }}
+
+      - name: Test SSH connectivity
+        run: |
+          ssh -p ${{ env.SSH_PORT }} ${{ env.SSH_USER }}@${{ env.SSH_HOST }} \
+            "echo 'SSH connection successful to ${{ env.PROJECT_NAME }}'"
+
+      - name: Prepare remote environment
+        run: |
+          ssh -p ${{ env.SSH_PORT }} ${{ env.SSH_USER }}@${{ env.SSH_HOST }} << 'ENDSSH'
+            set -e
+            mkdir -p ${{ env.REMOTE_BASE_PATH }}/${{ env.PROJECT_NAME }}
+            echo "Remote directory prepared: ${{ env.REMOTE_BASE_PATH }}/${{ env.PROJECT_NAME }}"
+          ENDSSH
+
+      - name: Deploy files via rsync
+        run: |
+          rsync -avz --delete --progress \
+            --exclude '.well-known' \
+            --exclude 'cgi-bin' \
+            --exclude 'node_modules' \
+            --exclude '.git' \
+            --exclude '.github' \
+            --exclude '.env*' \
+            --exclude '*.log' \
+            --exclude '.htaccess' \
+            -e "ssh -p ${{ env.SSH_PORT }}" \
+            ${{ env.BUILD_OUTPUT_DIR }} package.json package-lock.json \
+            ${{ env.SSH_USER }}@${{ env.SSH_HOST }}:${{ env.REMOTE_BASE_PATH }}/${{ env.PROJECT_NAME }}/
+
+      - name: Install production dependencies and restart services
+        run: |
+          ssh -p ${{ env.SSH_PORT }} ${{ env.SSH_USER }}@${{ env.SSH_HOST }} << 'ENDSSH'
+            set -e
+            cd ${{ env.REMOTE_BASE_PATH }}/${{ env.PROJECT_NAME }}
+
+            # Activate Node.js virtual environment
+            if [ -f "${{ env.NODE_ENV_PATH }}/${{ env.PROJECT_NAME }}/${{ env.NODE_VERSION }}/bin/activate" ]; then
+              source ${{ env.NODE_ENV_PATH }}/${{ env.PROJECT_NAME }}/${{ env.NODE_VERSION }}/bin/activate
+              echo "Node.js virtual environment activated"
+            else
+              echo "Warning: Node.js virtual environment not found"
+            fi
+
+            # Configure npm and install dependencies
+            npm config set strict-ssl false
+            npm ci --omit=dev --silent
+            npm config set strict-ssl true
+
+            echo "Production dependencies installed successfully"
+
+            # Optional: Restart services (uncomment and customize as needed)
+            # pm2 restart ${{ env.PROJECT_NAME }} || echo "PM2 restart failed or not configured"
+            # systemctl --user restart ${{ env.PROJECT_NAME }} || echo "systemd restart failed or not configured"
+          ENDSSH
+
+      - name: Verify deployment
+        run: |
+          ssh -p ${{ env.SSH_PORT }} ${{ env.SSH_USER }}@${{ env.SSH_HOST }} \
+            "cd ${{ env.REMOTE_BASE_PATH }}/${{ env.PROJECT_NAME }} && ls -la && echo 'Deployment verified'"
+
+      - name: Deployment summary
+        run: |
+          echo "🚀 Deployment completed successfully!"
+          echo "📁 Project: ${{ env.PROJECT_NAME }}"
+          echo "🖥️  Server: ${{ env.SSH_USER }}@${{ env.SSH_HOST }}:${{ env.SSH_PORT }}"
+          echo "📂 Path: ${{ env.REMOTE_BASE_PATH }}/${{ env.PROJECT_NAME }}"
