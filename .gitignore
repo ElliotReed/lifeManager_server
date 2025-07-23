@@ -3,6 +3,8 @@ config
 .env
 .vscode
 
+dist/
+
 .docs/
 database.md
 Notes.md

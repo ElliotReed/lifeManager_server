@@ -2,10 +2,11 @@
   "name": "lifemanager-server",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "build": "esbuild",
-    "dev": "nodemon ./bin/www",
-    "start": "./bin/www"
+    "build": "node build.js",
+    "dev": "nodemon ./src/bin/www",
+    "start": "./src/bin/www"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
