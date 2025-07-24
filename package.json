@@ -6,7 +6,7 @@
   "scripts": {
     "build": "node build.js",
     "dev": "nodemon ./src/bin/www",
-    "start": "./src/bin/www"
+    "start": "/bin/www.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
