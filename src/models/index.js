@@ -3,7 +3,6 @@ import path from 'path';
 import Sequelize from 'sequelize';
 import process from 'process';
 import { fileURLToPath, pathToFileURL } from 'url';
-import '../loadEnv.js';
 
 // Needed to get __dirname in ESM
 const __filename = fileURLToPath(import.meta.url);
