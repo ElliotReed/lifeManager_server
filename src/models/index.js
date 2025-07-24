@@ -1,34 +1,27 @@
 import fs from 'fs';
-import { createRequire } from 'module';
 import path from 'path';
 import Sequelize from 'sequelize';
 import process from 'process';
 import { fileURLToPath, pathToFileURL } from 'url';
-
-const require = createRequire(import.meta.url);
-const configJson = require('../config/config.json');
+import '../loadEnv.js';
 
 // Needed to get __dirname in ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const basename = path.basename(__filename);
-const env = process.env.NODE_ENV || 'development';
-const config = configJson[env];
 
 const db = {};
 
-let sequelize;
-if (config.use_env_variable) {
-  sequelize = new Sequelize(process.env[config.use_env_variable], config);
-} else {
-  sequelize = new Sequelize(
-    config.database,
-    config.username,
-    config.password,
-    config
-  );
-}
+const sequelize = new Sequelize(
+  process.env.DB_NAME,
+  process.env.DB_USERNAME,
+  process.env.DB_PASSWORD,
+  {
+    host: process.env.DB_HOST,
+    dialect: 'postgres',
+  }
+);
 
 const modelFiles = fs.readdirSync(__dirname).filter(
   (file) =>
