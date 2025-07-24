@@ -84,6 +84,7 @@ jobs:
             --exclude '.github' \
             --exclude '.env*' \
             --exclude '*.log' \
+            --exclude 'public' \
             --exclude '.htaccess' \
             -e "ssh -p ${{ env.SSH_PORT }}" \
             ${{ env.BUILD_OUTPUT_DIR }} package.json package-lock.json \
