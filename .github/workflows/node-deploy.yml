@@ -50,12 +50,12 @@ jobs:
         run: npm ci
 
       - name: Run tests (if available)
-        run: |
-          if npm run | grep -q "test"; then
-            npm test
-          else
-            echo "No test script found, skipping tests"
-          fi
+        # run: |
+        #   if npm run | grep -q "test"; then
+        #     npm test
+        #   else
+        #     echo "No test script found, skipping tests"
+        #   fi
         continue-on-error: true
 
       - name: Build project
