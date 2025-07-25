@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig",
+  "include": [
+    "src/**/*.js",
+    "src/**/*.ts",
+  ],
+  "exclude": [
+    "**/*.test.ts",
+    "node_modules",
+    "src/interfaces",
+    "src/seeders",
+    "jest.config.js",
+    "*.js",
+    "config",
+  ]
+}

@@ -8,12 +8,13 @@ import path from "path";
 import { fileURLToPath } from 'url';
 
 import api from "./api/index.js";
+import { testfunction } from "./utils/test.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-
+testfunction(); // Call the test function to ensure it's working
 const corsOptions = {
   origin: process.env.CLIENT,
   credentials: true,
