@@ -49,7 +49,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run tests (if available)
+      # - name: Run tests (if available)
         # run: |
         #   if npm run | grep -q "test"; then
         #     npm test
