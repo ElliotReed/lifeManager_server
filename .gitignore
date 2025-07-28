@@ -9,3 +9,5 @@ dist/
 .docs/
 database.md
 Notes.md
+
+tsconfig.build.tsbuildinfo
