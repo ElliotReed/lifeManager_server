@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import helment from "helmet";
 import createError from "http-errors";
 import express from "express";
 import logger from "morgan";
@@ -17,6 +18,7 @@ const corsOptions = {
   credentials: true,
 };
 
+app.use(helmet());
 app.use(cors(corsOptions));
 app.use(logger("dev"));
 app.use(express.json());
