@@ -1,24 +1,19 @@
+import 'dotenv/config';
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import createError from "http-errors";
-
 import express from "express";
 import logger from "morgan";
 import path from "path";
 import { fileURLToPath } from 'url';
 
-import 'dotenv/config';
-
 import api from "./api/index.js";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const app = express();
 
 const corsOptions = {
-  // origin: process.env.CLIENT,
-  origin: "https://lifemanager.elliotreed.net",
+  origin: process.env.CLIENT,
+  // origin: "https://lifemanager.elliotreed.net",
   credentials: true,
 };
 
@@ -28,7 +23,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static("public"));
 app.use("/", api);
 
 // catch 404 and forward to error handler

@@ -1,24 +1,32 @@
 
 import fs from 'fs';
 import path from 'path';
-import Sequelize from 'sequelize';
+import { Sequelize, DataTypes } from 'sequelize';
 import process from 'process';
 import { fileURLToPath, pathToFileURL } from 'url';
 
-// Needed to get __dirname in ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const basename = path.basename(__filename);
 
-const db = {};
+const db: { [key: string]: any } = {};
+
+const dbName = process.env.DB_NAME;
+const dbUsername = process.env.DB_USERNAME;
+const dbPassword = process.env.DB_PASSWORD;
+const dbHost = process.env.DB_HOST;
+
+if (!dbName || !dbUsername || !dbPassword || !dbHost) {
+  throw new Error('Database environment variables are not set properly.');
+}
 
 const sequelize = new Sequelize(
-  process.env.DB_NAME,
-  process.env.DB_USERNAME,
-  process.env.DB_PASSWORD,
+  dbName,
+  dbUsername,
+  dbPassword,
   {
-    host: process.env.DB_HOST,
+    host: dbHost,
     dialect: 'postgres',
   }
 );
@@ -34,7 +42,7 @@ for (const file of modelFiles) {
   const filePath = path.join(__dirname, file);
   const fileUrl = pathToFileURL(filePath).href;
   const { default: model } = await import(fileUrl);
-  const initializedModel = model(sequelize, Sequelize.DataTypes);
+  const initializedModel = model(sequelize, DataTypes);
   db[initializedModel.name] = initializedModel;
 }
 
