@@ -5,12 +5,14 @@
     "src/**/*.ts",
   ],
   "exclude": [
-    "**/*.test.ts",
+    "dist",
     "node_modules",
+    "public",
+    "scripts/*.js",
     "src/interfaces",
     "src/seeders",
     "jest.config.js",
     "*.js",
-    "config",
+    "**/*.test.ts",
   ]
 }

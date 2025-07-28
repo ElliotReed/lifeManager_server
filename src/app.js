@@ -15,7 +15,8 @@ const __dirname = path.dirname(__filename);
 const app = express();
 
 const corsOptions = {
-  origin: process.env.CLIENT,
+  // origin: process.env.CLIENT,
+  origin: "https://lifemanager.elliotreed.net",
   credentials: true,
 };
 
