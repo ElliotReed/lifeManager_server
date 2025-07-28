@@ -7,6 +7,8 @@ import logger from "morgan";
 import path from "path";
 import { fileURLToPath } from 'url';
 
+import 'dotenv/config';
+
 import api from "./api/index.js";
 
 const __filename = fileURLToPath(import.meta.url);
