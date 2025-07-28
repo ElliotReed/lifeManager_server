@@ -5,7 +5,8 @@
   "type": "module",
   "main": "src/bin/www",
   "scripts": {
-    "build": "tsc --project tsconfig.build.json",
+    "build": "tsc --project tsconfig.build.json && npm run copy-public",
+    "copy-public": "node scripts/copyPublic.js",
     "dev": "nodemon",
     "preview": "node ./dist/bin/www.js",
     "start": "node ./bin/www.js",
