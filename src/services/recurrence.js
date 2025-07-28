@@ -1,5 +1,5 @@
 const moment = require("moment");
 
-module.exports = (objRecurrence) => {
+export default (objRecurrence) => {
   return moment.now();
 };

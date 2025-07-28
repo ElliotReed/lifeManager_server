@@ -1,1 +1,1 @@
-module.exports = require("./recurrence");
+export default require("./recurrence");

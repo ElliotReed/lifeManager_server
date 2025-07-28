@@ -11,4 +11,4 @@ pointRouter.patch("/:pointId", async (req, res, next) => {
   console.log("patch points");
 });
 
-module.exports = pointRouter;
+export default pointRouter;
