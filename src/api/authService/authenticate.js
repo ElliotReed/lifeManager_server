@@ -1,11 +1,11 @@
-import db from '../../models/index.js';
+import db from '../../models/index';
 
 import { getRefreshCookieKey } from './config.js';
 import * as tokenService from './tokenService.js';
 import setResponseCredentials from './setResponseCredentials.js';
 
 const getUserById = async (id) => {
-  return (await db.user.findByPk(id));
+  return (await db.User.findByPk(id));
 };
 
 function getAccessTokenFromRequest(req) {

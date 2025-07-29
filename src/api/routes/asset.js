@@ -1,5 +1,5 @@
 import express from 'express';
-import db from '../../models/index.js';
+import db from '../../models/index';
 import { Op } from 'sequelize';
 
 const BASE = "/assets";
@@ -20,7 +20,7 @@ async function getAssetById(userId, assetId) {
   };
 
   try {
-    const asset = await db.asset.findOne(filter);
+    const asset = await db.Asset.findOne(filter);
     return asset;
   } catch (err) {
     err.message = `getAssetById failed: ${err.message}`;
@@ -68,7 +68,7 @@ async function getAssetChildren(userId, assetId) {
   };
 
   try {
-    const children = await db.asset.findAll(filter);
+    const children = await db.Asset.findAll(filter);
     if (!children) {
       throw new Error("could not find asset children");
     }
@@ -101,7 +101,7 @@ assetRouter.get("/", async function (req, res, next) {
   }
 
   try {
-    const assets = await db.asset.findAll(filter);
+    const assets = await db.Asset.findAll(filter);
     const assetsWithLinks = assets.map((asset) => {
       return { ...asset.dataValues, links: { href: `/assets/${asset.id}` } };
     });
@@ -119,7 +119,7 @@ assetRouter.get("/count", async function (req, res, next) {
   };
 
   try {
-    const count = await db.asset.count(filter);
+    const count = await db.Asset.count(filter);
     res.status(200).send({ count: count });
   } catch (err) {
     res.status(500).send({ error: err.message });
@@ -143,11 +143,11 @@ assetRouter.get("/roots", async function (req, res) {
   };
 
   try {
-    const typeIdOfProperty = await db.assetType.findOne(assetTypeFilter);
+    const typeIdOfProperty = await db.AssetType.findOne(assetTypeFilter);
 
     filter.where.typeId = typeIdOfProperty.dataValues.id;
 
-    const properties = await db.asset.findAll(filter);
+    const properties = await db.Asset.findAll(filter);
 
     async function getPropertiesDirectDescendants() {
       return await Promise.all(
@@ -186,7 +186,7 @@ assetRouter.get("/roots", async function (req, res) {
 });
 
 function getDirectDescendants(assetId) {
-  return db.asset.findAll({
+  return db.Asset.findAll({
     where: { locationId: { [Op.eq]: assetId } },
     attributes: ["id", "label", "description"],
   });
@@ -196,7 +196,7 @@ assetRouter.post("/", async (req, res, next) => {
   console.log("req.body: ", req.body);
   const assetWithUser = { userId: req.user.id, ...req.body };
   try {
-    const newAsset = await db.asset.create(assetWithUser);
+    const newAsset = await db.Asset.create(assetWithUser);
     if (!newAsset) throw new Error("asset creation failed");
     const link = `/assets/${newAsset.id}`;
     res.status(201).send({ ...newAsset, links: { href: link } });
@@ -291,7 +291,7 @@ assetRouter.patch("/asset/:assetId", async (req, res, next) => {
 assetRouter.patch("/asset-types", async (req, res) => {
   const id = req.body.id;
   try {
-    const assetType = await db.assetType.findByPk(id);
+    const assetType = await db.AssetType.findByPk(id);
 
     if (!assetType) throw new Error(`asset type not found`);
 
@@ -307,7 +307,7 @@ assetRouter.patch("/asset-types", async (req, res) => {
 
 assetRouter.post("/asset-types", async (req, res) => {
   try {
-    const newAssetType = await db.assetType.create(req.body);
+    const newAssetType = await db.AssetType.create(req.body);
 
     if (!newAssetType) throw new Error(`asset type could not be created`);
 

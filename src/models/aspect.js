@@ -27,7 +27,7 @@ export default (sequelize, DataTypes) => {
   );
 
   Aspect.associate = function (models) {
-    Aspect.hasMany(models.flow, {
+    Aspect.hasMany(models.Flow, {
       foreignKey: {
         name: "aspectId",
         type: DataTypes.UUID,
@@ -35,7 +35,7 @@ export default (sequelize, DataTypes) => {
       onDelete: "NO ACTION",
     });
 
-    Aspect.belongsTo(models.user, {
+    Aspect.belongsTo(models.User, {
       foreignKey: "userId",
       onDelete: "CASCADE",
     });

@@ -1,5 +1,5 @@
 import express from 'express';
-import db from '../../models/index.js';
+import db from '../../models/index';
 import { Op } from 'sequelize';
 
 const flowRouter = express.Router();
@@ -12,7 +12,7 @@ flowRouter.get("/", async function (req, res, next) {
     where: {
       userId: { [Op.eq]: req.user.id },
     },
-    include: [{ model: db.aspect, required: true, attributes: ["name"] }],
+    include: [{ model: db.Aspect, required: true, attributes: ["name"] }],
     order: [
       ["dtCompleted", "ASC NULLS FIRST"],
       ["flow", "ASC"],
@@ -20,7 +20,7 @@ flowRouter.get("/", async function (req, res, next) {
   };
 
   try {
-    const flow = await db.flow.findAll(filter);
+    const flow = await db.Flow.findAll(filter);
     res.status(200).send(flow);
   } catch (err) {
     res.status(409).send({ error: err.message });
@@ -34,7 +34,7 @@ flowRouter.post("/", async (req, res, next) => {
   let numberOfFlowItems;
 
   try {
-    numberOfFlowItems = await db.flow.findAndCountAll({
+    numberOfFlowItems = await db.Flow.findAndCountAll({
       where: {
         userId: { [Op.eq]: id },
       },
@@ -49,7 +49,7 @@ flowRouter.post("/", async (req, res, next) => {
     ...req.body,
   };
   try {
-    const newflowItem = await db.flow.create(flowItemWithUser);
+    const newflowItem = await db.Flow.create(flowItemWithUser);
     if (!newflowItem) throw new Error("flow creation failed");
     res.status(201).send(newflowItem);
   } catch (err) {
@@ -59,8 +59,8 @@ flowRouter.post("/", async (req, res, next) => {
 
 flowRouter.patch("/:actionId", async (req, res, next) => {
   try {
-    const action = await db.flow.findByPk(req.params.actionId, {
-      include: [{ model: db.aspect, required: true }],
+    const action = await db.Flow.findByPk(req.params.actionId, {
+      include: [{ model: db.Aspect, required: true }],
     });
 
     if (!action) throw new Error("No action to update");

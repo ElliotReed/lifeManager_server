@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import express from 'express';
 import { Op } from 'sequelize';
 
-import db from '../../models/index.js';
+import db from '../../models/index';
 
 import { getRefreshCookieKey } from './config.js';
 import authenticate from './authenticate.js';
@@ -19,7 +19,7 @@ authRouter.post("/register", async (req, res) => {
 
   const { email, password } = req.body;
   try {
-    const user = await db.user.findOne({
+    const user = await db.User.findOne({
       where: {
         email: { [Op.eq]: email },
       },
@@ -55,7 +55,7 @@ authRouter.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = await User.findOne({
+    const user = await db.User.findOne({
       where: { email: { [Op.eq]: email } },
     });
 

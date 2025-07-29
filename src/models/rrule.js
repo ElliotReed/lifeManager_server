@@ -18,7 +18,7 @@ export default (sequelize, DataTypes) => {
   );
 
   RRule.associate = function (models) {
-    RRule.belongsTo(models.task, { foreignKey: "taskId", onDelete: "CASCADE" });
+    RRule.belongsTo(models.Task, { foreignKey: "taskId", onDelete: "CASCADE" });
   };
 
   // RRule.sync({ alter: true });

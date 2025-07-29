@@ -22,7 +22,7 @@ export default (sequelize, DataTypes) => {
   );
 
   User.associate = function (models) {
-    User.hasMany(models.flow, {
+    User.hasMany(models.Flow, {
       foreignKey: "userId",
       onDelete: "CASCADE",
     });

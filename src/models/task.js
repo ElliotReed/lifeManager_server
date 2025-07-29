@@ -48,8 +48,8 @@ export default (sequelize, DataTypes) => {
   );
 
   Task.associate = function (models) {
-    Task.belongsTo(models.user);
-    Task.hasOne(models.rrule, { onDelete: "CASCADE" });
+    Task.belongsTo(models.User);
+    Task.hasOne(models.Rrule, { onDelete: "CASCADE" });
   };
 
   // Task.sync({ alter: true });

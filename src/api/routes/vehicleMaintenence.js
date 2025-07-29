@@ -1,5 +1,5 @@
 import express from 'express';
-import db from '../../models/index.js';
+import db from '../../models/index';
 import { Op } from 'sequelize';
 
 const vehicleMaintenenceRouter = express.Router();
@@ -9,7 +9,7 @@ const vehicleMaintenenceRouter = express.Router();
 vehicleMaintenenceRouter.get("/", async (req, res, next) => {
   console.log("req.user: ", req.user);
   try {
-    const vehicleMaintenences = await db.vehicleMaintenence.findAll({
+    const vehicleMaintenences = await db.VehicleMaintenence.findAll({
       where: { userId: { [Op.eq]: req.user.id } },
       attributes: ["name", "id", "archive", "createdAt", "updatedAt"],
       order: [["name", "ASC"]],
@@ -27,7 +27,7 @@ vehicleMaintenenceRouter.get("/", async (req, res, next) => {
 vehicleMaintenenceRouter.get("/:vehicleMaintenenceId", async (req, res, next) => {
   const id = req.params.vehicleMaintenenceId;
   try {
-    const vehicleMaintenence = await db.vehicleMaintenence.findOne({
+    const vehicleMaintenence = await db.VehicleMaintenence.findOne({
       where: {
         id: { [Op.eq]: id },
       },
@@ -45,7 +45,7 @@ vehicleMaintenenceRouter.patch("/:vehicleMaintenenceId", async (req, res, next) 
   console.log("patch req");
   const id = req.params.vehicleMaintenenceId;
   try {
-    const vehicleMaintenence = await db.vehicleMaintenence.findOne({
+    const vehicleMaintenence = await db.VehicleMaintenence.findOne({
       where: {
         id: { [Op.eq]: id },
       },
@@ -61,14 +61,14 @@ vehicleMaintenenceRouter.post("/", async (req, res, next) => {
   const vehicleMaintenenceWithUser = { userId: req.user.id, ...req.body };
   console.log("vehicleMaintenenceWithUser: ", vehicleMaintenenceWithUser);
   try {
-    const vehicleMaintenence = await db.vehicleMaintenence.findOne({
+    const vehicleMaintenence = await db.VehicleMaintenence.findOne({
       where: {
         name: { [Op.eq]: req.body.name },
       },
     });
 
     if (vehicleMaintenence) throw new Error("vehicleMaintenence already exists");
-    const newvehicleMaintenence = await db.vehicleMaintenence.create(vehicleMaintenenceWithUser);
+    const newvehicleMaintenence = await db.VehicleMaintenence.create(vehicleMaintenenceWithUser);
     res.status(201).send(newvehicleMaintenence);
   } catch (err) {
     res.status(409).send({ error: err.message });
@@ -79,7 +79,7 @@ vehicleMaintenenceRouter.delete("/:vehicleMaintenenceId", async (req, res, next)
   const id = req.params.vehicleMaintenenceId;
   console.log("id: ", id);
   try {
-    const vehicleMaintenence = await db.vehicleMaintenence.findOne({
+    const vehicleMaintenence = await db.VehicleMaintenence.findOne({
       where: {
         id: { [Op.eq]: id },
       },

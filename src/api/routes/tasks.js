@@ -2,7 +2,7 @@ import express from 'express';
 import { Op } from 'sequelize';
 import { endOfToday, startOfToday } from 'date-fns';
 
-import db from '../../models/index.js';
+import db from '../../models/index';
 
 const taskRouter = express.Router();
 
@@ -12,7 +12,7 @@ taskRouter.get("/", async (req, res, next) => {
     attributes: { exclude: ["userId"] },
     include: [
       {
-        model: db.rrule,
+        model: db.Rrule,
         required: false,
         attributes: { exclude: ["taskId"] },
       },
@@ -21,7 +21,7 @@ taskRouter.get("/", async (req, res, next) => {
   };
 
   try {
-    const tasks = await db.task.findAll(filter);
+    const tasks = await db.Task.findAll(filter);
 
     if (!tasks) throw new Error("No tasks were found!");
 
@@ -45,11 +45,11 @@ taskRouter.get("/byforeign/:foreignId", async (req, res, next) => {
       dtStart: { [Op.lte]: endOfToday() },
     },
     attributes: { exclude: ["userId"] },
-    include: [db.rrule],
+    include: [db.Rrule],
   };
 
   try {
-    const taskList = await db.task.findAll(filter);
+    const taskList = await db.Task.findAll(filter);
     res.status(200).send(taskList);
   } catch (err) {
     res.status(500).send({ error: err.message });
@@ -70,14 +70,14 @@ taskRouter.patch("/:taskId", async (req, res, next) => {
   };
 
   try {
-    const task = await db.task.findOne(filter);
+    const task = await db.Task.findOne(filter);
     task.update(taskToSave);
 
     if (!taskToSave.rrule) {
       return res.status(200).send(task);
     }
 
-    const [rrule, created] = await db.rrule.findOrCreate({
+    const [rrule, created] = await db.Rrule.findOrCreate({
       where: {
         taskId: req.params.taskId,
       },
@@ -105,8 +105,8 @@ taskRouter.post("/", async (req, res, next) => {
   const taskWithUser = { ...req.body, userId: req.user.id };
 
   try {
-    const newTask = await db.task.create(taskWithUser, {
-      include: [db.rrule],
+    const newTask = await db.Task.create(taskWithUser, {
+      include: [db.Rrule],
     });
     res.status(201).send(newTask);
   } catch (err) {
@@ -121,11 +121,11 @@ taskRouter.delete("/:taskId", async (req, res, next) => {
     where: {
       id: { [Op.eq]: id },
     },
-    include: [db.rrule],
+    include: [db.Rrule],
   };
 
   try {
-    const result = await db.task.destroy(filter);
+    const result = await db.Task.destroy(filter);
     res.status(200).send({
       id: id,
       message: `${result} task with id "${id}" has been deleted`,
@@ -145,7 +145,7 @@ taskRouter.delete("/rrule/:taskId", async (req, res, next) => {
   };
 
   try {
-    const result = await db.rrule.destroy(filter);
+    const result = await db.Rrule.destroy(filter);
     console.log("result: ", result);
     res.status(200).send({ message: "rrule removed", itemsRemoved: result });
   } catch (err) {

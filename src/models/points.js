@@ -23,7 +23,7 @@ export default (sequelize, DataTypes) => {
   );
 
   Points.associate = function (models) {
-    Points.belongsTo(models.user, {
+    Points.belongsTo(models.User, {
       foreignKey: "userId",
       onDelete: "CASCADE",
     });

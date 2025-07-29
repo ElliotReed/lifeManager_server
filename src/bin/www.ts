@@ -16,8 +16,8 @@ server.on("listening", onListening);
 /**
  * Normalize a port into a number, string, or false.
  */
-function normalizePort(val) {
-  var port = parseInt(val, 10);
+function normalizePort(val: string): number | string | false {
+  const port: number = parseInt(val, 10);
 
   if (isNaN(port)) {
     // named pipe
@@ -36,7 +36,12 @@ function normalizePort(val) {
  * Event listener for HTTP server "error" event.
  */
 
-function onError(error) {
+interface ListenError extends Error {
+  syscall: string;
+  code?: string;
+}
+
+function onError(error: ListenError): void {
   if (error.syscall !== "listen") {
     throw error;
   }
@@ -64,6 +69,11 @@ function onError(error) {
 
 function onListening() {
   var addr = server.address();
+  if (addr === null) {
+    console.error("Server address is null");
+    return;
+  }
+
   var bind = typeof addr === "string" ? "pipe " + addr : "port " + addr.port;
   debug("Listening on " + bind);
   console.log(`Listening at http://localhost:${port}`);

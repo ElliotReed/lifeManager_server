@@ -3,11 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "main": "src/bin/www.ts",
-  "type": "module",
   "scripts": {
     "build": "tsc --project tsconfig.build.json && npm run copy-public",
     "copy-public": "node scripts/copyPublic.cjs",
-    "dev": "nodemon",
+    "dev": "nodemon src/bin/www.ts",
     "preview": "node ./dist/bin/www.js",
     "start": "node ./bin/www.js",
     "test": "jest --watchAll",

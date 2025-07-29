@@ -1,5 +1,5 @@
 import express from 'express';
-import db from '../../models/index.js';
+import db from '../../models/index';
 import { Op } from 'sequelize';
 
 const assetTypeRouter = express.Router();
@@ -15,7 +15,7 @@ assetTypeRouter.get("/", async (req, res, next) => {
   };
 
   try {
-    const assetTypes = await db.assetType.findAll(filter);
+    const assetTypes = await db.AssetType.findAll(filter);
     if (!assetTypes) throw new Error("types not found");
     res.status(200).send(assetTypes);
   } catch (err) {

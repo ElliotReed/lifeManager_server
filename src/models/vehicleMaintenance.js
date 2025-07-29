@@ -1,8 +1,8 @@
 "use strict";
 
 export default (sequelize, DataTypes) => {
-  const VehicleMaintenence = sequelize.define(
-    "vehicleMaintenence",
+  const VehicleMaintenance = sequelize.define(
+    "vehicleMaintenance",
     {
       id: {
         allowNull: false,
@@ -33,10 +33,10 @@ export default (sequelize, DataTypes) => {
       //   type: DataTypes.INTEGER,
       // },
     },
-    { timestamps: false, tableName: "vehicleMaintenence" }
+    { timestamps: false, tableName: "vehicleMaintenance" }
   );
 
-  VehicleMaintenence.associate = function (models) { };
+  VehicleMaintenance.associate = function (models) { };
 
-  return VehicleMaintenence;
+  return VehicleMaintenance;
 };

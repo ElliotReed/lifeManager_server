@@ -40,7 +40,7 @@ export default (sequelize, DataTypes) => {
   );
 
   Flow.associate = function (models) {
-    Flow.belongsTo(models.aspect, {
+    Flow.belongsTo(models.Aspect, {
       foreignKey: {
         name: "aspectId",
         type: DataTypes.UUID,

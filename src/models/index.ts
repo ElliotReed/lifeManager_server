@@ -1,16 +1,14 @@
-
-import fs from 'fs';
-import path from 'path';
 import { Sequelize, DataTypes } from 'sequelize';
-import process from 'process';
-import { fileURLToPath, pathToFileURL } from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const basename = path.basename(__filename);
-
-const db: { [key: string]: any } = {};
+import User from './user';
+import Aspect from './aspect';
+import Asset from './asset';
+import AssetType from './assetType';
+import Flow from './flow';
+import Points from './points';
+import Rrule from './rrule';
+import Task from './task';
+import VehicleMaintenance from './vehicleMaintenance';
 
 const dbName = process.env.DB_NAME;
 const dbUsername = process.env.DB_USERNAME;
@@ -31,30 +29,28 @@ const sequelize = new Sequelize(
   }
 );
 
-const modelFiles = fs.readdirSync(__dirname).filter(
-  (file) =>
-    file.indexOf('.') !== 0 &&
-    file !== basename &&
-    file.slice(-3) === '.js'
-);
+const models = {
+  User: User(sequelize, DataTypes),
+  Aspect: Aspect(sequelize, DataTypes),
+  Asset: Asset(sequelize, DataTypes),
+  AssetType: AssetType(sequelize, DataTypes),
+  Flow: Flow(sequelize, DataTypes),
+  Points: Points(sequelize, DataTypes),
+  Rrule: Rrule(sequelize, DataTypes),
+  Task: Task(sequelize, DataTypes),
+  VehicleMaintenance: VehicleMaintenance(sequelize, DataTypes),
+};
 
-for (const file of modelFiles) {
-  const filePath = path.join(__dirname, file);
-  const fileUrl = pathToFileURL(filePath).href;
-  const { default: model } = await import(fileUrl);
-  const initializedModel = model(sequelize, DataTypes);
-  db[initializedModel.name] = initializedModel;
-}
-
-// Ensure all models are in `db` before running associations
-for (const modelName of Object.keys(db)) {
-  if (db[modelName].associate) {
-    db[modelName].associate(db);
+Object.values(models).forEach((model: any) => {
+  if (model.associate) {
+    model.associate(models);
   }
-}
+});
 
-
-db.sequelize = sequelize;
-db.Sequelize = Sequelize;
+const db = {
+  ...models,
+  sequelize,
+  Sequelize,
+};
 
 export default db;

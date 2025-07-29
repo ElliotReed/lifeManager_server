@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import helment from "helmet";
+import helmet from "helmet";
 import createError from "http-errors";
 import express from "express";
 import logger from "morgan";
