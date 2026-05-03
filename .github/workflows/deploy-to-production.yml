@@ -1,0 +1,61 @@
+name: Deploy Node App to Production
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  VPS_HOST: ${{ secrets.VPS_HOST }}
+  VPS_USER: ${{ secrets.VPS_USER }}
+  SITE_NAME: lifemanager_server
+  NODE_VERSION: "24"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Set remote path
+        run: echo "REMOTE_SITE_PATH=~/apps/${{ env.SITE_NAME }}" >> $GITHUB_ENV
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
+
+      - name: Add SSH host to known_hosts
+        run: ssh-keyscan ${{ env.VPS_HOST }} >> ~/.ssh/known_hosts
+
+     - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+        
+      - name: Deploy via rsync
+        run: |
+          rsync -avz --delete \
+            --exclude 'node_modules' \
+            --exclude '.git' \
+            --exclude '.github' \
+            --exclude '.env' \
+            ./dist/ \
+            ${{ env.VPS_USER }}@${{ env.VPS_HOST }}:${{ env.REMOTE_SITE_PATH }}/
+
+      - name: Install deps, run migrations & restart PM2
+        run: |
+          ssh ${{ env.VPS_USER }}@${{ env.VPS_HOST }} << 'EOF'
+            cd ${{ env.REMOTE_SITE_PATH }}
+            npm ci --omit=dev
+            npx sequelize-cli db:migrate
+            pm2 restart ${{ env.SITE_NAME }} || pm2 start ./bin/www --name ${{ env.SITE_NAME }}
+            pm2 save
+          EOF
+
+      - name: Deployment summary
+        run: |
+          echo "🚀 Deployed to ${{ env.VPS_HOST }}"
+          echo "📁 App: ${{ env.SITE_NAME }}"

@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "allowJs": true,
-    "baseUrl": "./src",
+    "paths": {
+      "~/*": [
+        "./src/*"
+      ]
+    },
     "checkJs": false,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,

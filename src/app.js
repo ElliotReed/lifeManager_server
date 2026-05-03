@@ -14,7 +14,7 @@ const app = express();
 
 const corsOptions = {
   origin: process.env.CLIENT,
-  // origin: "https://lifemanager.elliotreed.net",
+  // origin: "https://lifemanager.elliotreed.dev",
   credentials: true,
 };
 
