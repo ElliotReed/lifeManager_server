@@ -52,7 +52,7 @@
               cd ${{ env.REMOTE_SITE_PATH }}
               npm ci --omit=dev
               npx sequelize-cli db:migrate
-              pm2 restart ${{ env.SITE_NAME }} || pm2 start ./bin/www --name ${{ env.SITE_NAME }}
+              pm2 restart ${{ env.SITE_NAME }} || pm2 start ./bin/www.js --name ${{ env.SITE_NAME }}
               pm2 save
             EOF
 
