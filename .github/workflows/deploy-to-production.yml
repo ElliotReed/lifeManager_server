@@ -44,6 +44,8 @@
               --exclude '.github' \
               --exclude '.env' \
               ./dist/ \
+              package.json \
+              package-lock.json \
               ${{ env.VPS_USER }}@${{ env.VPS_HOST }}:${{ env.REMOTE_SITE_PATH }}/
 
         - name: Install deps, run migrations & restart PM2
