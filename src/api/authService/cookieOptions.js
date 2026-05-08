@@ -1,10 +1,12 @@
 export default function cookieOptions() {
+  const isProductionEnv = process.env.NODE_ENV === "production";
+
   const options = {
     httpOnly: true,
-    SameSite: "none",
-    secure: true,
+    sameSite: isProductionEnv ? "none" : "lax",
+    secure: isProductionEnv,
     domain:
-      process.env.NODE_ENV === "production"
+      isProductionEnv
         ? process.env.PRODUCTION_DOMAIN
         : process.env.DEVELOPMENT_DOMAIN,
     // milliseconds, 1000 = 1 second, * seconds * minutes * hours * days

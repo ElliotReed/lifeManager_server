@@ -79,8 +79,9 @@ authRouter.post("/logout", (req, res) => {
 });
 
 authRouter.get("/tokens", authenticate, async (req, res) => {
+  console.log('req.user.id: ', req.user.id);
   try {
-    const userData = await User.findByPk(req.user.id, {
+    const userData = await db.User.findByPk(req.user.id, {
       attributes: { exclude: ["password"] },
     });
     res.status(200).send(userData);
